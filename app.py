@@ -3,7 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
-plt.rcParams['font.family'] = 'AppleGothic'
+# 相対パスでフォント読み込み
+font_path = "fonts/NotoSansJP-Regular.ttf"
+font_prop = fm.FontProperties(fname=font_path)
+plt.rcParams['font.family'] = font_prop.get_name()
 
 # CSV読み込み
 uploaded_file = st.file_uploader("プレイデータCSVをアップロードしてください", type="csv")
