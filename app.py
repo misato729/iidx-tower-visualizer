@@ -1,45 +1,61 @@
 import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
+from streamlit_elements import dashboard, mui, html, sync, editor, media, nivo, lazy, event, format, control, update, antd, ui, plotly, echarts, el, recharts
+import random
+from datetime import datetime, timedelta
 
-# ✅ フォント読み込み（Noto Sans JP）
-font_path = "fonts/NotoSansJP-Regular.ttf"
-font_prop = fm.FontProperties(fname=font_path)
+st.set_page_config(layout="wide")
+st.title("🎵 beatmania IIDX プレイ傾向ダッシュボード")
 
-# デバッグ：フォント名の確認（ローカル実行時のみ出力）
-print("✅ 読み込んだフォント名:", font_prop.get_name())
+# -----------------------------
+# サンプルデータを自動生成
+# -----------------------------
+data = []
+today = datetime.today()
+for i in range(30):
+    day = (today - timedelta(days=29 - i)).strftime("%Y-%m-%d")
+    data.append({
+        "日付": day,
+        "鍵盤": random.randint(5000, 30000),
+        "スクラッチ": random.randint(200, 3000)
+    })
 
-# 🔽 Streamlitアプリ開始
-st.title("beatmania IIDX プレイ傾向ダッシュボード")
+# -----------------------------
+# ダッシュボードレイアウト
+# -----------------------------
+layout = [
+    dashboard.Item("keyboard_chart", 0, 0, 6, 4),
+    dashboard.Item("scratch_chart", 6, 0, 6, 4),
+]
 
-# ✅ CSVファイルアップロード
-uploaded_file = st.file_uploader("プレイデータCSVをアップロードしてください", type="csv")
-if uploaded_file:
-    # CSV読み込み
-    df = pd.read_csv(uploaded_file)
-    df["プレー日"] = pd.to_datetime(df["プレー日"])
-    df = df.sort_values("プレー日")
+# -----------------------------
+# UI描画
+# -----------------------------
+with dashboard.Grid(layout, draggable=True, resizable=True):
+    
+    # 🔷 鍵盤グラフ
+    with mui.Card(key="keyboard_chart"):
+        mui.CardHeader(title="🔷 鍵盤入力数（直近30日）")
+        with mui.CardContent():
+            recharts.ResponsiveContainer(width="100%", height=250)(
+                recharts.LineChart(data=data)(
+                    recharts.XAxis(dataKey="日付"),
+                    recharts.YAxis(),
+                    recharts.Tooltip(),
+                    recharts.Legend(),
+                    recharts.Line(type="monotone", dataKey="鍵盤", stroke="#8884d8"),
+                )
+            )
 
-    # 📈 折れ線グラフ：鍵盤 & スクラッチ
-    st.subheader("日別プレイ入力数（鍵盤・スクラッチ）")
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(df["プレー日"], df["鍵盤"], label="鍵盤", marker="o")
-    ax.plot(df["プレー日"], df["スクラッチ"], label="スクラッチ", marker="x")
-
-    # ✅ 日本語フォントを適用
-    ax.set_title("日別プレイ入力数（鍵盤・スクラッチ）", fontproperties=font_prop)
-    ax.set_xlabel("日付", fontproperties=font_prop)
-    ax.set_ylabel("入力数", fontproperties=font_prop)
-    ax.legend(prop=font_prop)
-    ax.grid(True)
-
-    # グラフ表示
-    st.pyplot(fig)
-
-    # 📊 総合統計表示
-    st.subheader("総合統計")
-    st.metric("総鍵盤数", int(df["鍵盤"].sum()))
-    st.metric("総スクラッチ数", int(df["スクラッチ"].sum()))
-else:
-    st.info("CSVファイルをアップロードしてください。")
+    # 🟠 スクラッチグラフ
+    with mui.Card(key="scratch_chart"):
+        mui.CardHeader(title="🟠 スクラッチ回数（直近30日）")
+        with mui.CardContent():
+            recharts.ResponsiveContainer(width="100%", height=250)(
+                recharts.LineChart(data=data)(
+                    recharts.XAxis(dataKey="日付"),
+                    recharts.YAxis(),
+                    recharts.Tooltip(),
+                    recharts.Legend(),
+                    recharts.Line(type="monotone", dataKey="スクラッチ", stroke="#ff7300"),
+                )
+            )
