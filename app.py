@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 st.set_page_config(layout="wide")
 st.title("🎵 beatmania IIDX プレイ傾向ダッシュボード")
@@ -14,49 +15,53 @@ if uploaded_file:
         df = df.sort_values("プレー日")
         df["月"] = df["プレー日"].dt.to_period("M").astype(str)
 
-        # ✅ 鍵盤・スクラッチを縦持ちに変換
-        melted = df.melt(id_vars=["プレー日", "月"], value_vars=["鍵盤", "スクラッチ"],
-                         var_name="種別", value_name="入力数")
+        # 📈 Plotly: 鍵盤（左軸）＋スクラッチ10倍（右軸）
+        st.markdown("### 📈 鍵盤 & スクラッチ（10倍）入力数推移")
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-        # ✅ Plotlyグラフ：背景を薄いピンク + スクラッチは赤
-        st.markdown("### 📈 鍵盤 & スクラッチ 入力数推移")
-        fig = px.line(
-            melted,
-            x="プレー日",
-            y="入力数",
-            color="種別",
-            color_discrete_map={
-                "鍵盤": "#636EFA",       # デフォルト青
-                "スクラッチ": "#FF4D4D"  # 鮮やかな赤
-            },
-            markers=True,
-            height=400
+        fig.add_trace(
+            go.Scatter(x=df["プレー日"], y=df["鍵盤"], mode="lines+markers", name="鍵盤", line=dict(color="#636EFA")),
+            secondary_y=False
         )
 
-        # ✅ 背景色変更（薄いピンク）
+        fig.add_trace(
+            go.Scatter(x=df["プレー日"], y=df["スクラッチ"] * 10, mode="lines+markers", name="スクラッチ ×10", line=dict(color="#FF4D4D")),
+            secondary_y=True
+        )
+
         fig.update_layout(
-            plot_bgcolor="#FFF0F5",    # 薄ピンク (LavenderBlush)
-            paper_bgcolor="#FFF0F5",
-            hovermode="x unified"
+            height=450,
+            plot_bgcolor="#F5F5F5",  # 薄グレー背景
+            paper_bgcolor="#F5F5F5",
+            hovermode="x unified",
+            legend=dict(bgcolor="#F5F5F5")
         )
+
+        fig.update_yaxes(title_text="鍵盤", secondary_y=False)
+        fig.update_yaxes(title_text="スクラッチ ×10", secondary_y=True)
 
         st.plotly_chart(fig, use_container_width=True)
 
-        # ✅ 月ごとの合計・平均集計
+        # 📅 月別集計 + 平均行
         summary = df.groupby("月").agg({
-            "鍵盤": ["sum", "mean"],
-            "スクラッチ": ["sum", "mean"]
-        }).round().astype(int)
+            "鍵盤": "sum",
+            "スクラッチ": "sum"
+        }).reset_index()
 
-        summary.columns = ["鍵盤_合計", "鍵盤_平均", "スクラッチ_合計", "スクラッチ_平均"]
-        summary = summary.reset_index()
+        avg_row = {
+            "月": "平均",
+            "鍵盤": int(df["鍵盤"].mean()),
+            "スクラッチ": int(df["スクラッチ"].mean())
+        }
 
-        st.markdown("### 📅 月別集計")
+        summary = pd.concat([summary, pd.DataFrame([avg_row])], ignore_index=True)
+
+        st.markdown("### 📊 月別合計 + 平均")
         st.dataframe(summary, use_container_width=True)
 
-        # ✅ 合計表示
+        # ✅ 総合統計（全期間合計）
         st.markdown("---")
-        st.markdown("### 📊 総合統計")
+        st.markdown("### 🧮 総合統計")
         col1, col2 = st.columns(2)
         col1.metric("総鍵盤数", f"{df['鍵盤'].sum():,}")
         col2.metric("総スクラッチ数", f"{df['スクラッチ'].sum():,}")
