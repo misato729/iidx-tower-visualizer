@@ -3,7 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
-plt.rcParams['font.family'] = 'Hiragino Sans'
+font_path = "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc"
+font_prop = fm.FontProperties(fname=font_path)
+plt.rcParams['font.family'] = font_prop.get_name()
+
 
 # CSV読み込み
 uploaded_file = st.file_uploader("プレイデータCSVをアップロードしてください", type="csv")
