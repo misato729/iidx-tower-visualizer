@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+
+plt.rcParams['font.family'] = 'Hiragino Sans'
 
 # CSV読み込み
 uploaded_file = st.file_uploader("プレイデータCSVをアップロードしてください", type="csv")
