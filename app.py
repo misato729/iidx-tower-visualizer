@@ -46,45 +46,45 @@ if uploaded_file:
                 with mui.CardContent():
                     fig = go.Figure()
 
-                        # 🔵 鍵盤（左Y軸）
-                        fig.add_trace(go.Scatter(
-                            x=df["プレー日"], y=df["鍵盤"],
-                            mode="lines+markers", name="鍵盤", line=dict(color="blue"),
-                            yaxis="y1"
-                        ))
-                        
-                        # 🔴 スクラッチ（右Y軸）→ 実数を表示、軸だけ1/10スケールにする
-                        fig.add_trace(go.Scatter(
-                            x=df["プレー日"], y=df["スクラッチ"],
-                            mode="lines+markers", name="スクラッチ",
-                            line=dict(color="red"),
-                            yaxis="y2"
-                        ))
-                        
-                        # 背景・軸設定
-                        fig.update_layout(
-                            height=400,
-                            plot_bgcolor="#F5F5F5",
-                            paper_bgcolor="#F5F5F5",
-                            hovermode="x unified",
-                            legend=dict(bgcolor="#F5F5F5"),
-                            yaxis=dict(  # 左軸（鍵盤）
-                                title="鍵盤",
-                                showgrid=True,
-                            ),
-                            yaxis2=dict(  # 右軸（スクラッチ）
-                                title="スクラッチ",
-                                overlaying='y',
-                                side='right',
-                                showgrid=False,
-                                range=[
-                                    df["鍵盤"].min() / 10,
-                                    df["鍵盤"].max() / 10
-                                ]
-                            )
+                    # 🔵 鍵盤（左Y軸）
+                    fig.add_trace(go.Scatter(
+                        x=df["プレー日"], y=df["鍵盤"],
+                        mode="lines+markers", name="鍵盤", line=dict(color="blue"),
+                        yaxis="y1"
+                    ))
+                    
+                    # 🔴 スクラッチ（右Y軸）→ 実数を表示、軸だけ1/10スケールにする
+                    fig.add_trace(go.Scatter(
+                        x=df["プレー日"], y=df["スクラッチ"],
+                        mode="lines+markers", name="スクラッチ",
+                        line=dict(color="red"),
+                        yaxis="y2"
+                    ))
+                    
+                    # 背景・軸設定
+                    fig.update_layout(
+                        height=400,
+                        plot_bgcolor="#F5F5F5",
+                        paper_bgcolor="#F5F5F5",
+                        hovermode="x unified",
+                        legend=dict(bgcolor="#F5F5F5"),
+                        yaxis=dict(  # 左軸（鍵盤）
+                            title="鍵盤",
+                            showgrid=True,
+                        ),
+                        yaxis2=dict(  # 右軸（スクラッチ）
+                            title="スクラッチ",
+                            overlaying='y',
+                            side='right',
+                            showgrid=False,
+                            range=[
+                                df["鍵盤"].min() / 10,
+                                df["鍵盤"].max() / 10
+                            ]
                         )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
 
 
             # 📊 月別表
